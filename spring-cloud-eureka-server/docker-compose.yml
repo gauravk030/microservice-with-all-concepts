@@ -1,0 +1,143 @@
+
+services:
+  eureka-server:
+    image: eureka-server-eureka-server:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eureka-server   
+    ports:
+      - "8761:8761"
+    networks:
+      - monitoring
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.13
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+        
+  elasticsearch-exporter:
+    image: justwatch/elasticsearch_exporter:latest
+    container_name: elasticsearch-exporter
+    environment:
+      - ES_URI=http://elasticsearch:9200
+    ports:
+      - "9114:9114"
+    networks:
+      - monitoring
+    depends_on:
+      - elasticsearch
+              
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin   # Set the Grafana admin password
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+    networks:
+      - monitoring
+  
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.17.13
+    container_name: logstash
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5000:5000"
+    depends_on:
+      - elasticsearch
+    networks:
+      - monitoring    
+  
+#  filebeat:
+#    image: docker.elastic.co/beats/filebeat:7.17.13
+#    container_name: filebeat
+#    user: root
+#    volumes:
+#      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+#      - /var/run/docker.sock:/var/run/docker.sock
+#      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml
+#    depends_on:
+#      - logstash 
+#    networks:
+#      - monitoring    
+      
+#  filebeat:
+#    image: docker.elastic.co/beats/filebeat:7.17.13
+#    container_name: filebeat
+#    user: root
+#    volumes:
+#      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+#      - /var/run/docker.sock:/var/run/docker.sock
+#      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro # work on windows
+#    depends_on:
+#      - logstash
+#    networks:
+#      - monitoring    
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.13
+    container_name: filebeat
+    user: root
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      sh -c "
+      cp /tmp/filebeat.yml /usr/share/filebeat/filebeat.yml &&
+      chmod go-w /usr/share/filebeat/filebeat.yml &&
+      filebeat -e
+      "
+    configs:
+      - source: filebeat_config
+        target: /tmp/filebeat.yml
+    depends_on:
+      - logstash
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml  # Ensure you have the correct Prometheus config
+    ports:
+      - "9090:9090"  # Expose Prometheus web UI on port 9090
+    networks:
+      - monitoring
+    depends_on:
+      - eureka-server # You can add more services to scrape depending on your config
+      - elasticsearch
+
+volumes:
+  esdata:
+  
+configs:
+  filebeat_config:
+    file: ./filebeat.yml
+        
+networks:
+  monitoring:
+    driver: bridge

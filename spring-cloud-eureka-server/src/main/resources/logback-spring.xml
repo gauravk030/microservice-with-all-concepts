@@ -1,0 +1,28 @@
+<configuration>
+  <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+    <destination>logstash:5000</destination>
+    <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+      <providers>
+        <timestamp>
+          <timeZone>UTC</timeZone>
+        </timestamp>
+        <loggerName/>
+        <pattern>
+          <pattern>
+            {
+              "application": "${spring.application.name:-}",
+              "level": "%level",
+              "message": "%message",
+              "thread": "%thread"
+            }
+          </pattern>
+        </pattern>
+      </providers>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+  	<appender-ref ref="CONSOLE" />
+    <appender-ref ref="LOGSTASH" />
+  </root>
+</configuration>

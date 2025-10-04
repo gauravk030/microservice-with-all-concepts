@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: CURRENCY-CONVERSION-LIMIT-SERVICE
+  config:
+    import: optional:configserver:http://localhost:8888
+

@@ -1,0 +1,6 @@
+## if same key present in global then iti is overirde by specific service key
+spring:
+  application:
+    name: currency-exchange-service
+  config: 
+    import: optional:configserver:http://localhost:8888

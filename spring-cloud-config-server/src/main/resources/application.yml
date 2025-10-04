@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: spring-cloud-config-server
+  profiles:
+    active: qa,development,default
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/gauravk030/git-config-repo.git
+          search-paths: config
+          default-label: master
+ 
+          #private then need credential
+          #username: <github-username>
+          #password: <github-token>
+          
+          # clone-on-start: true
+          # bootstrap: true
+
+server:
+  port: 8888
+  # management.port: 8888   # Uncomment if you want actuator on a separate port
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        #include: "*"   # Expose all endpoints
+        include: refresh # Call refresh endpoint after updating config:
+
+# Optional Spring Security (uncomment if needed)
+# spring:
+#   security:
+#     user:
+#       name: root
+#       password: s3cr3t
