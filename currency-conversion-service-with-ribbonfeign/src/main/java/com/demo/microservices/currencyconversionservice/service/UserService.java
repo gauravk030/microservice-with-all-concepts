@@ -1,10 +1,13 @@
 package com.demo.microservices.currencyconversionservice.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
 import com.demo.microservices.currencyconversionservice.model.User;
 import com.demo.microservices.currencyconversionservice.repository.UserRepository;
 
@@ -12,6 +15,7 @@ import com.demo.microservices.currencyconversionservice.repository.UserRepositor
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -26,6 +30,7 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
         if (user == null) {
+        	logger.error("User not found");
             throw new UsernameNotFoundException("User not found");
         }
         return org.springframework.security.core.userdetails.User.withUsername(user.getUsername())

@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: security
+server:
+  port: 8081
+  
+logging:
+  file:
+    name: "D:/Gaurav/Study/Programs/Backend Programs/microservice/microservice2/microservice_logs/security-service/application.log"
+  pattern:
+    file: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  logstash:
+    enabled: true
+    destination: localhost:5004
+    custom-fields: '{"service":"gateway-server"}'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  security:
+    enabled: false

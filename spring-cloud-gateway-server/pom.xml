@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.5.5</version>
+		<version>3.2.2</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.sample.gatewayserver</groupId>
@@ -16,7 +16,7 @@
 	<description>Spring Boot project for Spring Cloud Gateway</description>
 	<properties>
 		<java.version>11</java.version>
-		<spring-cloud.version>2020.0.4</spring-cloud.version>
+		<spring-cloud.version>2023.0.0</spring-cloud.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -121,6 +121,20 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- Addied for centralised log -->
+		<dependency>
+		    <groupId>net.logstash.logback</groupId>
+		    <artifactId>logstash-logback-encoder</artifactId>
+		    <version>6.6</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-log4j12</artifactId>
+		    <version>2.1.0-alpha1</version>
+		    <type>pom</type>
+		</dependency>
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
@@ -134,7 +148,7 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<build>
+	<!--<build>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -144,6 +158,15 @@
 						<name>gauravkhrnr/${project.artifactId}</name>
 					</image>
 				</configuration>
+			</plugin>
+		</plugins>
+	</build>-->
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

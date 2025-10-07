@@ -1,0 +1,72 @@
+spring:
+  application:
+    name: gatewayserver
+    
+  cloud:
+    gateway:
+      cache:
+        cacheHeaders: 
+      # discovery:
+      #   locator:
+      #     enabled: true
+      #     lower-case-service-id: true
+
+server:
+  port: 8091
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+
+management:
+  endpoints:
+    jmx:
+      exposure:
+        include: health,info,env,beans
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+
+logging:
+  file:
+    name: "D:/Gaurav/Study/Programs/Backend Programs/microservice/microservice2/microservice_logs/gateway-server/application.log"
+  pattern:
+    file: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  logstash:
+    enabled: true
+    destination: localhost:5004
+    custom-fields: '{"service":"gateway-server"}'
+
+# Optional Config Server import
+# spring:
+#   config:
+#     import: optional:configserver:http://localhost:8888
+
+# Optional profile activation
+# spring:
+#   profiles:
+#     active: "@activatedProperties@"
+
+# Optional Ribbon configuration (commented out)
+# currency-exchange-service:
+#   ribbon:
+#     listOfServers: http://localhost:8000,http://localhost:8001
+
+# Optional cloud compatibility verifier
+# spring:
+#   cloud:
+#     compatibility-verifier:
+#       enabled: false

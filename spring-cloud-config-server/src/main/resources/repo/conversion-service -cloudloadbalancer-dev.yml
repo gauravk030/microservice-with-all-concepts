@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: CURRENCY-CONVERSION-SERVICE
+  datasource:
+    url: jdbc:mysql://localhost:3307/auth
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  cloud:
+    loadbalancer:
+      instances:
+        currency-exchange-service:
+          # 0: http://localhost:8000
+          1: http://localhost:8000         
+ 
+server:
+  port: 8100
+  
+resilience4j:
+  circuitbreaker:
+    instances:
+      currencyExchangeService:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 6           # same as requestVolumeThreshold
+        minimumNumberOfCalls: 6        # min calls before evaluating failure rate
+        failureRateThreshold: 50       # % of failures to open CB
+        waitDurationInOpenState: 10s   # same as sleepWindowInMilliseconds
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        enable: false     

@@ -1,0 +1,46 @@
+<configuration>
+
+    <!-- Rolling file appender -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>D:/Gaurav/Study/Programs/Backend Programs/microservice/microservice2/microservice_logs/security-service/application.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>D:/Gaurav/Study/Programs/Backend Programs/microservice/microservice2/microservice_logs/security-service/application-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service":"security-service"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- Async wrapper for file appender -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>5000</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <!-- Logstash TCP appender for real-time streaming -->
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:5004</destination> <!-- must match Logstash TCP input port -->
+        <reconnectionDelay>5000</reconnectionDelay>  <!-- reconnect every 5s if Logstash is down -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service":"security-service"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- Async wrapper for TCP appender -->
+    <appender name="ASYNC_LOGSTASH" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="LOGSTASH"/>
+        <queueSize>5000</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="ASYNC_FILE"/>
+        <appender-ref ref="ASYNC_LOGSTASH"/>
+    </root>
+
+</configuration>

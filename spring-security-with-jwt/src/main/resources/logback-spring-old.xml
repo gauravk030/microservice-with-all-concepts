@@ -1,0 +1,29 @@
+<configuration>
+
+    <!-- Rolling file appender -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>D:/Gaurav/Study/Programs/Backend Programs/microservice/microservice2/microservice_logs/security-service/application.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>D:/Gaurav/Study/Programs/Backend Programs/microservice/microservice2/microservice_logs/security-service/application-%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+
+        <!-- Optional: JSON logs for Logstash, but file only -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service":"security"}</customFields>
+        </encoder>
+    </appender>
+
+    <!-- Async wrapper to prevent blocking -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="FILE"/>
+        <queueSize>5000</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="ASYNC_FILE"/>
+    </root>
+
+</configuration>

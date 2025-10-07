@@ -1,6 +1,8 @@
 spring:
+  profiles:
+    active: dev
   application:
-    name: CURRENCY-CONVERSION-LIMIT-SERVICE
+    name: currency-conversion-limit-service
   config:
     import: optional:configserver:http://localhost:8888
 

@@ -1,11 +1,70 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3307/globaldb
+    url: jdbc:mysql://localhost:3307/auth
     username: root
     password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    
+    ## dont add below in config server side,Only add in client side
+    #config:
+      #import: optional:configserver:http://localhost:8888
+    ## keep option or add below if server hang up
+    #fail-fast: false
+    #retry:
+      #max-attempts: 1
+      #initial-interval: 1000
+      #multiplier: 1.5
+  cloud:
+    config:
+      retry:
+        max-attempts: 3
+        initial-interval: 1000
+        multiplier: 1.5
+        
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 5   # default 30s  
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 5 # default 30s
+    lease-expiration-duration-in-seconds: 10  
+    # hostname: localhost
+    # instance-id: ${spring.application.name}:${random.value} -- optional bec it auomatcally genertae id
+
+
+security:
+  jwt:
+    secret: wLQW3+uG9qF3Z2OTFE5LjeyUKld2XYBfVqvlgGSH6Gg=
+
+logging:
+  level:
+    org.springframework: INFO
+    org.hibernate: ERROR
+    com.example: DEBUG
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
 
 management:
   endpoints:
     web:
+      base-path: /actuator
       exposure:
-        include: health,info
+        include: info, health, refresh  # include all endpoints you need
+    health:
+      show-details: always
+      enabled: true
+    info:
+      enabled: true
+

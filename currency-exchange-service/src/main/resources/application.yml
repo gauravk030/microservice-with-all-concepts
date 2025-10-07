@@ -1,6 +1,8 @@
 ## if same key present in global then iti is overirde by specific service key
 spring:
+  profiles:
+    active: dev
   application:
-    name: currency-exchange-service
+    name: exchange-service
   config: 
     import: optional:configserver:http://localhost:8888

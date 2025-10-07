@@ -1,13 +1,11 @@
 package com.sample.gatewayserver.filters;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
@@ -19,7 +17,7 @@ import com.sample.gatewayserver.util.JwtUtils;
 import reactor.core.publisher.Mono;
 
 @Component
-public class JwtAuthenticationFilter implements WebFilter {
+public class JwtAuthenticationFilter implements WebFilter, Ordered {
 
     @Autowired
     private JwtUtils jwtUtil;
@@ -27,46 +25,49 @@ public class JwtAuthenticationFilter implements WebFilter {
     @Autowired
     private UserService1 userService;
 
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        ServerHttpRequest request = exchange.getRequest();
-        String authHeader = request.getHeaders().getFirst("Authorization");
-        UsernamePasswordAuthenticationToken authentication = null;
-        
-
-        if (authHeader != null) {
-            System.out.println("Authorization Header: " + authHeader);  // Log the header
-        } else {
-            System.out.println("No Authorization Header found");
-        }
-
-        
+        String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String jwt = authHeader.substring(7);
-            String username = jwtUtil.extractUsername(jwt);
 
-            if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userService.loadUserByUsername(username);
+            return Mono.justOrEmpty(jwtUtil.extractUsername(jwt))
+                    .flatMap(username -> userService.loadUserByUsernameReactive(username)
+                            .flatMap(userDetails -> {
+                                if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
+                                    UsernamePasswordAuthenticationToken authentication =
+                                            new UsernamePasswordAuthenticationToken(
+                                                    userDetails, null, userDetails.getAuthorities());
+                                    return chain.filter(exchange)
+                                            .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
+                                } else {
+                                    logger.warn("JWT token validation failed for user: {}", username);
+                                    return unauthorized(exchange);
+                                }
+                            }))
+                    .switchIfEmpty(chain.filter(exchange)) // continue chain if username extraction fails
+                    .onErrorResume(e -> {
+                        logger.error("JWT processing error: {}", e.getMessage(), e);
+                        return unauthorized(exchange);
+                    });
 
-                if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
-                    authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    //SecurityContextHolder.getContext().setAuthentication(authentication);
-                    return chain.filter(exchange).contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
-                }
-            }
-        }else if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-            // Respond with 401 Unauthorized or handle as per your need
-            return Mono.error(new IllegalArgumentException("Authorization header is missing or invalid"));
+        } else {
+            // Let unauthenticated requests continue if your endpoint allows it
+            return chain.filter(exchange);
         }
-
-        return chain.filter(exchange);
     }
-    
-//    @Override
-//	public int getOrder() {
-//	    return -1; // Run *after* SecurityWebFiltersOrder.AUTHENTICATION (which is 0)
-//	}
 
+
+    private Mono<Void> unauthorized(ServerWebExchange exchange) {
+        exchange.getResponse().setStatusCode(org.springframework.http.HttpStatus.UNAUTHORIZED);
+        return exchange.getResponse().setComplete();
+    }
+
+    @Override
+    public int getOrder() {
+        return -1; // Run BEFORE security filter chain
+    }
 }

@@ -2,6 +2,8 @@ package com.demo.microservices.currencyconversionservice.filter;
 
 import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,6 +29,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserService userService;
+    
+    private static final Logger logger = LoggerFactory.getLogger(JwtRequestFilter.class);
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -40,8 +44,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.extractUsername(jwtToken);
             } catch (IllegalArgumentException e) {
+            	logger.error("Unable to get JWT Token ",e);
                 System.out.println("Unable to get JWT Token");
             } catch (ExpiredJwtException e) {
+            	logger.error("JWT Token has expired ",e);
                 System.out.println("JWT Token has expired");
             }
         } else {

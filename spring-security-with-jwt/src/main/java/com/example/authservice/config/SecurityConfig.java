@@ -29,16 +29,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf()
-            .disable()
-            .authorizeRequests()
-            .antMatchers("/auth/**").permitAll()  // Allow these without auth
-            .anyRequest().authenticated(); 
-            
+            .csrf().disable()
+            .authorizeRequests()   // use authorizeRequests() for Spring Security 5.x
+            .antMatchers("/auth/**").permitAll()        // allow auth endpoints
+            .antMatchers("/actuator/info", "/actuator/health","/actuator/refresh").permitAll() // allow actuator endpoints
+            .anyRequest().authenticated()
+            .and()
+            .httpBasic(); // optional
 
         return http.build();
     }
-
 //    @Bean
 //    public PasswordEncoder passwordEncoder() {
 //        return new BCryptPasswordEncoder();

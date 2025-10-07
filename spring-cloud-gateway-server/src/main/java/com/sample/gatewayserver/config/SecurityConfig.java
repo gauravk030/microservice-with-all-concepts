@@ -18,7 +18,6 @@ import com.sample.gatewayserver.filters.RequestTraceFilter;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    
     private final RequestTraceFilter requestTraceFilter;
 
     @Autowired
