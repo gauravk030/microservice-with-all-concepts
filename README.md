@@ -47,15 +47,15 @@ http://localhost:5601/
 
 for login user kibana useradmin credential
 
-Step 2: Create a Data View
+Step 1: Create a Data View
 1.	Open Kibana → Stack Management → Data Views → Create data view.
-2.	Enter elktest-* as the index pattern.
+2.	Enter microservice-* as the index pattern.
 3.	Select @timestamp as the time field.
 4.	Click Create data view.
 ________________________________________
-Step 3: Create Line Chart – Log Count Over Time
+Step 2: Create Line Chart – Log Count Over Time
 1.	Go to Visualize Library → Create Visualization → Line.
-2.	Choose elktest-* as the data view.
+2.	Choose microservice-* as the data view.
 3.	Configure X-axis:
 o	Aggregation: Date Histogram
 o	Field: @timestamp
@@ -64,9 +64,9 @@ o	Aggregation: Count
 5.	Optional: set interval (auto or per your time scale).
 6.	Save visualization as Log Count Over Time.
 ________________________________________
-Step 4: Create Pie Chart – Distribution of log_level
+Step 3: Create Pie Chart – Distribution of log_level
 1.	Go to Visualize Library → Create Visualization → Pie.
-2.	Choose elktest-* as the data view.
+2.	Choose microservice-* as the data view.
 3.	Buckets → Split Slices:
 o	Aggregation: Terms
 o	Field: log_level.keyword (use .keyword for exact values)
@@ -74,9 +74,9 @@ o	Size: 10 (top 10 log levels)
 4.	Y-axis: Count (default)
 5.	Save visualization as Log Level Distribution.
 ________________________________________
-Step 5: Create Data Table – Top Log Messages
+Step 4: Create Data Table – Top Log Messages
 1.	Go to Visualize Library → Create Visualization → Data Table.
-2.	Choose elktest-* as the data view.
+2.	Choose microservice-* as the data view.
 3.	Buckets → Split Rows:
 o	Aggregation: Terms
 o	Field: log_message.keyword
@@ -84,7 +84,7 @@ o	Size: 10 (top 10 messages)
 4.	Metric: Count (default)
 5.	Save visualization as Top Log Messages.
 ________________________________________
-Step 6: Create Dashboard
+Step 5: Create Dashboard
 1.	Go to Dashboard → Create new dashboard.
 2.	Click Add from library.
 3.	Select the three visualizations you created:
@@ -94,7 +94,7 @@ o	Top Log Messages
 4.	Arrange them on the dashboard.
 5.	Save dashboard as ELK Test Logs Dashboard.
 ________________________________________
-Step 7: View and Monitor
+Step 6: View and Monitor
 •	Go to the Discover tab and filter logs as needed.
 •	Dashboard will update in real-time as new logs are ingested by Logstash.
 •	Use time picker to see specific time ranges.
@@ -102,4 +102,3 @@ Step 7: View and Monitor
 
 ## 3) Run logstash
 D:\logstash\logstash.bat
-http://localhost:5601/
