@@ -10,6 +10,12 @@
 
 ## II) Register user
 http://localhost:8081/auth/register (post)
+
+{
+    "username":"gaurav",
+    "password":"abc123",
+    "role":"admin"
+}
  
 ## III) Login to generate token 
 http://localhost:8081/auth/login (post)
